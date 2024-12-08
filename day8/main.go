@@ -74,6 +74,77 @@ func part1() {
 	fmt.Println(len(antinodes))
 }
 
+func gcd(a, b int) int {
+	if b == 0 {
+		return a
+	}
+	return gcd(b, a%b)
+}
+
+func abs(x int) int {
+	if x < 0 {
+		return -x
+	}
+	return x
+}
+
+func part2() {
+	input, err := readInput("day8.input")
+	check(err)
+	antennasByFreq := make(map[rune][]Coordinate)
+	for y := 0; y < len(input); y++ {
+		for x := 0; x < len(input[y]); x++ {
+			if isAntenna(input[y][x]) {
+				freq := input[y][x]
+				antennasByFreq[freq] = append(antennasByFreq[freq], Coordinate{X: x, Y: y})
+			}
+		}
+	}
+
+	rows := len(input)
+	cols := len(input[0])
+	antinodes := make(map[Coordinate]struct{})
+
+	for _, coords := range antennasByFreq {
+		if len(coords) < 2 {
+			continue
+		}
+		for i := 0; i < len(coords); i++ {
+			for j := i + 1; j < len(coords); j++ {
+				A := coords[i]
+				B := coords[j]
+				dx := B.X - A.X
+				dy := B.Y - A.Y
+
+				g := gcd(abs(dx), abs(dy))
+				stepX := dx / g
+				stepY := dy / g
+				currentX, currentY := A.X, A.Y
+				for {
+					if currentX < 0 || currentX >= cols || currentY < 0 || currentY >= rows {
+						break
+					}
+					antinodes[Coordinate{X: currentX, Y: currentY}] = struct{}{}
+					currentX += stepX
+					currentY += stepY
+				}
+				currentX, currentY = A.X, A.Y
+				for {
+					if currentX < 0 || currentX >= cols || currentY < 0 || currentY >= rows {
+						break
+					}
+					antinodes[Coordinate{X: currentX, Y: currentY}] = struct{}{}
+					currentX -= stepX
+					currentY -= stepY
+				}
+			}
+		}
+	}
+
+	fmt.Println(len(antinodes))
+}
+
 func main() {
 	part1()
+	part2()
 }
